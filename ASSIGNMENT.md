@@ -2,7 +2,7 @@
 
 Build a small service and UI for recording and reviewing CI builds.
 
-**Effort: ~5 hours. Deadline: 4 calendar days from when you received this.**
+**Effort: ~5 hours. Deadline: 5 calendar days from when you received this.**
 
 We've deliberately given you more calendar time than work, so you can fit it
 around your week. Please don't spend more than about five hours on it — see
