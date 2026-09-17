@@ -1,0 +1,46 @@
+# Provided so you don't have to spend any of your five hours on infrastructure.
+#
+#   docker compose up --build
+#
+#   API  -> http://localhost:8000/api/health/
+#   Web  -> http://localhost:3000
+#
+# The web container proxies /api to the api container (see
+# frontend/webpack.config.js), so there is no CORS setup to worry about.
+#
+# Running it locally without Docker works just as well -- see README.md. Use
+# whichever you prefer; we'll follow your README.
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Live reload: your edits apply without a rebuild.
+      - .:/app
+      # Keep the container's SQLite file out of your working tree.
+      - api-data:/data
+    environment:
+      DJANGO_DEBUG: "1"
+      DJANGO_DB_PATH: /data/db.sqlite3
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    environment:
+      # Consumed by webpack.config.js to reach the api service.
+      API_PROXY_TARGET: http://api:8000
+    depends_on:
+      - api
+
+volumes:
+  api-data:
