@@ -34,13 +34,15 @@ around your week. Please don't spend more than about five hours on it — see
 3. **`GET /api/services/`** — one row per service: total builds, success rate,
    and the status of its **most recent** build.
 
-4. Load the provided `data/seed_builds.json` (5,000 records) with a management
+4. Load the provided `data/seed_builds.json` (~2,500 records) with a management
    command. A stub lives at `builds/management/commands/load_seed.py`.
 
 ### Frontend — React + TypeScript
 
 5. A form that submits a build to #1, surfacing server-side validation errors
-   next to the offending fields, and updating the list on success.
+   next to the offending fields, and updating the list on success. Note: yes,
+   it's not likely a real-world scenario to manually enter build information
+   like this.
 
 6. The builds table from #2 with its filters, and the service summary from #3.
 
