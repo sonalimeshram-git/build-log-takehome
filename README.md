@@ -85,3 +85,53 @@ a rebuild. Use it or ignore it — whichever gets you building faster.
 
 Settings are in `config/settings.py`: SQLite, DRF with page-size 50, no auth,
 `USE_TZ = True`. Change anything you like; note it in `DECISIONS.md`.
+
+
+### Run in Virtual Env
+
+# 1. Create the virtual environment (once)
+py -3.12 -m venv .venv
+
+# 2. Activate it (every new terminal)
+.venv\Scripts\Activate.ps1
+
+# 3 If PowerShell says "running scripts is disabled on this system", run this once, then activate again:
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+
+# 3. Install Python packages (once, or when requirements.txt changes)
+pip install -r requirements.txt
+
+# 4. Create the database tables
+python manage.py migrate
+
+# 5. Load the seed data (safe to run again)
+python manage.py load_seed
+### Should shw- Inserted 2503, skipped 0 already present, rejected 0 invalid (0.77s). Total builds: 2504.
+
+# 6. Run the tests
+pytest
+
+# 7. Start the API -> http://localhost:8000/api/health/
+python manage.py runserver
+
+# 8. In another terminal start the webpack dev server (nodejs) -> 
+cd frontend
+npm run dev
+
+## Project layout
+builds/
+  models.py                     Build model: fields, indexes, database constraints
+  serializers.py                Validation for POST, and the service summary output
+  views.py                      The three endpoints
+  urls.py                       DRF mapping
+  management/commands/load_seed.py  Load Seed data
+  tests/                        pytest tests with DB and API tests
+config/                         Django settings and root URLs (unchanged from the starter)
+data/seed_builds.json           Seed data (2,500 builds)
+frontend/src/
+  types.ts                      TypeScript types that mirror the API
+  api.ts                        The only module that calls the API
+  format.ts                     Display helpers (duration, UTC time, %)
+  components/                   Create form, builds table, service summary
+  App.tsx                       Main entry file
+  index.css                     css data

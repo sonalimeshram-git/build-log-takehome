@@ -1,53 +1,57 @@
 import { useEffect, useState } from "react";
 
-import { getHealth, type HealthResponse } from "./api";
+import { listServices } from "./api";
+import BuildsTable from "./components/BuildsTable";
+import ServiceSummaryTable from "./components/ServiceSummaryTable";
+import CreateBuildForm from "./components/CreateBuildForm";
+import type { ServiceSummary } from "./types";
 
-/**
- * Starting point. Everything below the header is scaffolding you're expected
- * to replace -- see ASSIGNMENT.md items 5 and 6:
- *
- *   - a form that POSTs a build and shows server-side field errors
- *   - the builds table, with its service and status filters
- *   - the per-service summary
- *
- * Structure the app however you like. There's no router or component library
- * installed; add one if you want one, and mention it in DECISIONS.md.
- */
 export default function App() {
-  const [health, setHealth] = useState<HealthResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // Bump to reload everything after a change (the create form will call this in Step 5b).
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Fetched once here because two places need it: the summary table and the service filter.
+  const [services, setServices] = useState<ServiceSummary[] | null>(null);
+  const [servicesError, setServicesError] = useState<string | null>(null);
+  const [servicesRetry, setServicesRetry] = useState(0);
 
   useEffect(() => {
-    getHealth()
-      .then(setHealth)
+    const controller = new AbortController();
+    setServicesError(null);
+    listServices(controller.signal)
+      .then(setServices)
       .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : String(err));
+        if (!controller.signal.aborted) {
+          setServicesError(err instanceof Error ? err.message : String(err));
+        }
       });
-  }, []);
+    return () => controller.abort();
+  }, [refreshKey, servicesRetry]);
 
+  const serviceNames = (services ?? []).map((s) => s.service);
   return (
     <main>
       <h1>Build Log</h1>
-
       <section>
-        <h2>Backend connection</h2>
-        {error && <p role="alert">Could not reach the API: {error}</p>}
-        {!error && !health && <p>Checking…</p>}
-        {health && (
-          <p>
-            API <strong>{health.status}</strong>, database{" "}
-            <strong>{health.database}</strong>. You're wired up — start building.
-          </p>
-        )}
+        <h2>Record a build</h2>
+        <CreateBuildForm
+          serviceNames={serviceNames}
+          onCreated={() => setRefreshKey((k) => k + 1)}
+        />
       </section>
 
       <section>
-        <h2>To build</h2>
-        <ol>
-          <li>Record-a-build form (POST /api/builds/)</li>
-          <li>Builds table with service and status filters (GET /api/builds/)</li>
-          <li>Per-service summary (GET /api/services/)</li>
-        </ol>
+        <h2>Services</h2>
+        <ServiceSummaryTable
+          services={services}
+          error={servicesError}
+          onRetry={() => setServicesRetry((n) => n + 1)}
+        />
+      </section>
+
+      <section>
+        <h2>Builds</h2>
+        <BuildsTable serviceNames={(services ?? []).map((s) => s.service)} refreshKey={refreshKey} />
       </section>
     </main>
   );
