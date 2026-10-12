@@ -21,3 +21,7 @@ More tests are possible but and should be written but I have covered high level 
 I used npm and py commands to test the Front end and API integration locally, didn't setup docker.
 used .venv because it provides  virtual env that keeps the backend's Python and Django packages seperate from other python packages so this project can use specific version.
 
+### Misc
+No auth, rate limiting, or deployment (out of scope). Ideas for next steps
+are in DECISIONS.md.
+
